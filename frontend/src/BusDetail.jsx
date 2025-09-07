@@ -1,5 +1,16 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
+import { MapContainer, TileLayer, Marker, Polyline, Popup, useMap } from "react-leaflet";
+import L from "leaflet";
+
+// helper component to auto-pan map to current stop
+function RecenterMap({ lat, lng }) {
+  const map = useMap();
+  useEffect(() => {
+    map.setView([lat, lng], map.getZoom(), { animate: true });
+  }, [lat, lng, map]);
+  return null;
+}
 
 function BusDetail() {
   const { id } = useParams();
@@ -18,54 +29,73 @@ function BusDetail() {
 
   if (!bus) return <p style={{ textAlign: "center", marginTop: "50px" }}>Loading...</p>;
 
+  const currentStop = bus.stops[bus.currentIndex];
+
+  // bus marker icon
+  const busIcon = new L.Icon({
+    iconUrl: "https://cdn-icons-png.flaticon.com/512/61/61205.png",
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
+  });
+
   return (
     <div style={{ padding: "30px", fontFamily: "Inter, sans-serif", background: "#f9fafb", minHeight: "100vh" }}>
-      <Link
-        to="/"
+      <Link to="/" style={{ textDecoration: "none", color: "#007bff", fontWeight: "500" }}>← Back</Link>
+
+      <h1 style={{ margin: "15px 0" }}>{bus.name}</h1>
+
+      {/* MAP */}
+      <div style={{ height: "400px", borderRadius: "12px", overflow: "hidden", marginBottom: "20px" }}>
+        <MapContainer
+          center={[currentStop.lat, currentStop.lng]}
+          zoom={12}
+          style={{ height: "100%", width: "100%" }}
+        >
+          <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+          <Polyline positions={bus.stops.map(s => [s.lat, s.lng])} color="blue" />
+          {bus.stops.map((stop, idx) => (
+            <Marker key={idx} position={[stop.lat, stop.lng]}>
+              <Popup>
+                {stop.name} <br /> {stop.time}
+              </Popup>
+            </Marker>
+          ))}
+          <Marker position={[currentStop.lat, currentStop.lng]} icon={busIcon}>
+            <Popup>🚌 {currentStop.name} (Current)</Popup>
+          </Marker>
+          <RecenterMap lat={currentStop.lat} lng={currentStop.lng} />
+        </MapContainer>
+      </div>
+
+      {/* Distance Info */}
+      <div
         style={{
-          display: "inline-block",
-          marginBottom: "20px",
-          textDecoration: "none",
-          color: "#007bff",
+          background: "#e8f5e9",
+          padding: "12px 18px",
+          margin: "15px 0 25px",
+          borderRadius: "12px",
+          border: "1px solid #c8e6c9",
+          color: "#2e7d32",
           fontWeight: "500",
+          fontSize: "1rem",
         }}
       >
-        ← Back
-      </Link>
+        <strong>{bus.distanceLeft} kms</strong> to{" "}
+        <span style={{ color: "#1b5e20" }}>{bus.nextStop.name}</span>
+      </div>
 
+      {/* TIMELINE */}
       <div
         style={{
           background: "#fff",
-          padding: "25px 30px",
+          padding: "20px 25px",
           borderRadius: "16px",
           boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
           maxWidth: "600px",
           margin: "0 auto",
         }}
       >
-        <h1 style={{ marginBottom: "10px", fontSize: "1.8rem", color: "#222" }}>{bus.name}</h1>
-        <p style={{ marginBottom: "20px", color: "#555", fontSize: "0.95rem" }}>
-          Tracking live movement of bus <strong>{bus.id}</strong>
-        </p>
-
-        {/* Distance / Next stop info */}
-        <div
-          style={{
-            background: "#e8f5e9",
-            padding: "12px 18px",
-            margin: "15px 0 25px",
-            borderRadius: "12px",
-            border: "1px solid #c8e6c9",
-            color: "#2e7d32",
-            fontWeight: "500",
-            fontSize: "1rem",
-          }}
-        >
-          <strong>{bus.distanceLeft} kms</strong> to{" "}
-          <span style={{ color: "#1b5e20" }}>{bus.nextStop.name}</span>
-        </div>
-
-        {/* Timeline */}
+        <h2 style={{ marginBottom: "20px", fontSize: "1.3rem", color: "#333" }}>Route Timeline</h2>
         <div style={{ position: "relative", marginLeft: "25px" }}>
           <div
             style={{
@@ -84,7 +114,6 @@ function BusDetail() {
 
             return (
               <div key={idx} style={{ marginBottom: "35px", position: "relative" }}>
-                {/* Connector line coloring */}
                 {idx > 0 && (
                   <div
                     style={{
@@ -94,14 +123,12 @@ function BusDetail() {
                       width: "4px",
                       height: "40px",
                       backgroundColor: isPast ? "#ef5350" : "#e0e0e0",
-                      zIndex: 0,
                       borderRadius: "2px",
                       transition: "background-color 0.3s ease",
                     }}
                   />
                 )}
 
-                {/* Stop marker */}
                 <div
                   style={{
                     width: isCurrent ? "20px" : "14px",
@@ -111,7 +138,6 @@ function BusDetail() {
                     position: "absolute",
                     left: "-32px",
                     top: "0",
-                    zIndex: 1,
                     border: "3px solid #fff",
                     boxShadow: "0 0 4px rgba(0,0,0,0.15)",
                     transition: "all 0.3s ease",
