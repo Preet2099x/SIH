@@ -95,28 +95,32 @@ function BusDetail() {
             <div>
               <div
                 style={{
-                  height: "12px",
+                  height: "14px",
                   background: "#e0e0e0",
                   borderRadius: "8px",
                   overflow: "hidden",
+                  position: "relative",
                 }}
               >
                 <div
                   style={{
                     width: `${progress}%`,
                     height: "100%",
-                    background: "linear-gradient(90deg, #43a047, #66bb6a)",
+                    background: "linear-gradient(135deg, #43a047 25%, #66bb6a 25%, #66bb6a 50%, #43a047 50%, #43a047 75%, #66bb6a 75%, #66bb6a)",
+                    backgroundSize: "40px 40px",
+                    animation: "progress-stripes 1s linear infinite",
                     transition: "width 0.5s ease",
                   }}
                 />
               </div>
-              <p style={{ textAlign: "right", marginTop: "5px", fontSize: "0.85rem", color: "#444" }}>
+              <p style={{ textAlign: "right", marginTop: "6px", fontSize: "0.85rem", color: "#444" }}>
                 {progress}% completed
               </p>
             </div>
           );
         })()}
       </div>
+
 
 
       {/* TIMELINE */}
