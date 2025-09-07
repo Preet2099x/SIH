@@ -1,20 +1,24 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import { MapContainer, TileLayer, Marker, Polyline, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 
-// helper component to auto-pan map to current stop
-function RecenterMap({ lat, lng }) {
+// Helper: auto-pan to bus
+function RecenterMap({ lat, lng, followBus }) {
   const map = useMap();
   useEffect(() => {
-    map.setView([lat, lng], map.getZoom(), { animate: true });
-  }, [lat, lng, map]);
+    if (followBus) {
+      map.setView([lat, lng], map.getZoom(), { animate: true });
+    }
+  }, [lat, lng, followBus, map]);
   return null;
 }
 
 function BusDetail() {
   const { id } = useParams();
   const [bus, setBus] = useState(null);
+  const [followBus, setFollowBus] = useState(true); // toggle state
+  const mapRef = useRef();
 
   useEffect(() => {
     const fetchBus = () => {
@@ -38,11 +42,55 @@ function BusDetail() {
     iconAnchor: [16, 32],
   });
 
+  // Fit all stops in view
+  const fitToRoute = () => {
+    if (!mapRef.current) return;
+    const map = mapRef.current;
+    const bounds = bus.stops.map(s => [s.lat, s.lng]);
+    map.fitBounds(bounds, { padding: [50, 50] });
+  };
+
   return (
     <div style={{ padding: "30px", fontFamily: "Inter, sans-serif", background: "#f9fafb", minHeight: "100vh" }}>
       <Link to="/" style={{ textDecoration: "none", color: "#007bff", fontWeight: "500" }}>← Back</Link>
-
       <h1 style={{ margin: "15px 0" }}>{bus.name}</h1>
+
+      {/* Map toggle buttons */}
+      <div style={{ marginBottom: "10px", display: "flex", gap: "10px" }}>
+        <button
+          onClick={() => {
+            setFollowBus(true);
+          }}
+          style={{
+            padding: "8px 14px",
+            borderRadius: "8px",
+            border: "none",
+            background: followBus ? "#007bff" : "#e0e0e0",
+            color: followBus ? "#fff" : "#333",
+            cursor: "pointer",
+            fontWeight: "500",
+          }}
+        >
+          Focus on Bus
+        </button>
+        <button
+          onClick={() => {
+            setFollowBus(false);
+            fitToRoute();
+          }}
+          style={{
+            padding: "8px 14px",
+            borderRadius: "8px",
+            border: "none",
+            background: !followBus ? "#007bff" : "#e0e0e0",
+            color: !followBus ? "#fff" : "#333",
+            cursor: "pointer",
+            fontWeight: "500",
+          }}
+        >
+          View Full Route
+        </button>
+      </div>
 
       {/* MAP */}
       <div style={{ height: "400px", borderRadius: "12px", overflow: "hidden", marginBottom: "20px" }}>
@@ -50,6 +98,7 @@ function BusDetail() {
           center={[currentStop.lat, currentStop.lng]}
           zoom={12}
           style={{ height: "100%", width: "100%" }}
+          whenCreated={(mapInstance) => (mapRef.current = mapInstance)}
         >
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
           <Polyline positions={bus.stops.map(s => [s.lat, s.lng])} color="blue" />
@@ -63,7 +112,7 @@ function BusDetail() {
           <Marker position={[currentStop.lat, currentStop.lng]} icon={busIcon}>
             <Popup>🚌 {currentStop.name} (Current)</Popup>
           </Marker>
-          <RecenterMap lat={currentStop.lat} lng={currentStop.lng} />
+          <RecenterMap lat={currentStop.lat} lng={currentStop.lng} followBus={followBus} />
         </MapContainer>
       </div>
 
