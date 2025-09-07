@@ -84,6 +84,41 @@ function BusDetail() {
         <span style={{ color: "#1b5e20" }}>{bus.nextStop.name}</span>
       </div>
 
+      {/* Progress Bar */}
+      <div style={{ margin: "0 auto 25px", maxWidth: "600px" }}>
+        {(() => {
+          const traveled = bus.currentStop.distance;
+          const total = bus.stops[bus.stops.length - 1].distance;
+          const progress = Math.min(100, Math.round((traveled / total) * 100));
+
+          return (
+            <div>
+              <div
+                style={{
+                  height: "12px",
+                  background: "#e0e0e0",
+                  borderRadius: "8px",
+                  overflow: "hidden",
+                }}
+              >
+                <div
+                  style={{
+                    width: `${progress}%`,
+                    height: "100%",
+                    background: "linear-gradient(90deg, #43a047, #66bb6a)",
+                    transition: "width 0.5s ease",
+                  }}
+                />
+              </div>
+              <p style={{ textAlign: "right", marginTop: "5px", fontSize: "0.85rem", color: "#444" }}>
+                {progress}% completed
+              </p>
+            </div>
+          );
+        })()}
+      </div>
+
+
       {/* TIMELINE */}
       <div
         style={{
