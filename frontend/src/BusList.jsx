@@ -5,12 +5,15 @@ import { Link } from "react-router-dom";
 function BusList() {
   const [buses, setBuses] = useState([]);
   const [liveStatus, setLiveStatus] = useState({}); // { busId: { currentIndex, currentStopName } }
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    setIsLoading(true);
     fetch("http://localhost:4000/buses")
       .then((r) => r.json())
       .then((data) => setBuses(data))
-      .catch((e) => console.error(e));
+      .catch((e) => console.error(e))
+      .finally(() => setIsLoading(false));
   }, []);
 
   useEffect(() => {
