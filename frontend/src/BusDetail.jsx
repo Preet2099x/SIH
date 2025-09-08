@@ -235,81 +235,141 @@ function BusDetail() {
         })()}
       </div>
 
-      {/* TIMELINE */}
+      {/* TIMELINE (improved UI) */}
       <div
         style={{
           background: "#fff",
-          padding: "20px 25px",
-          borderRadius: "16px",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-          maxWidth: "600px",
+          padding: "24px",
+          borderRadius: 16,
+          boxShadow: "0 6px 20px rgba(12,16,22,0.06)",
+          maxWidth: 720,
           margin: "0 auto",
         }}
       >
-        <h2 style={{ marginBottom: "20px", fontSize: "1.3rem", color: "#333" }}>Route Timeline</h2>
-        <div style={{ position: "relative", marginLeft: "25px" }}>
+        <h2 style={{ marginBottom: 18, fontSize: "1.25rem", color: "#222", fontWeight: 700 }}>Route Timeline</h2>
+
+        <div style={{ position: "relative", paddingLeft: 48, paddingRight: 12 }}>
+          {/* vertical line */}
           <div
             style={{
               position: "absolute",
-              top: "0",
-              left: "0",
-              bottom: "0",
-              width: "4px",
-              background: "#e0e0e0",
-              borderRadius: "2px",
+              top: 12,
+              left: 12,
+              bottom: 12,
+              width: 6,
+              borderRadius: 6,
+              background: "linear-gradient(180deg, #dfeff1 0%, #e9f7ee 100%)",
+              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.6)",
             }}
           />
+
           {bus.stops.map((stop, idx) => {
             const isPast = idx < bus.currentIndex;
             const isCurrent = idx === bus.currentIndex;
 
+            // circle styles
+            const circleSize = isCurrent ? 18 : 12;
+            const circleColor = isPast ? "#43a047" : isCurrent ? "#ffffff" : "#42a5f5";
+            const circleBorder = isPast ? "3px solid #43a047" : isCurrent ? "3px solid #2e7d32" : "3px solid #e6eef0";
+            const labelColor = isCurrent ? "#1b5e20" : isPast ? "#666" : "#333";
+            const timeColor = isCurrent ? "#145a32" : "#777";
+            const cardBg = isCurrent ? "#f0fbf4" : "transparent";
+            const connectorTop = idx === 0 ? 18 : -6; // small overlap to look continuous
+
             return (
-              <div key={idx} style={{ marginBottom: "35px", position: "relative" }}>
+              <div key={idx} style={{ position: "relative", padding: "8px 0 20px" }}>
+                {/* connector segment (colored for past) */}
                 {idx > 0 && (
                   <div
+                    aria-hidden
                     style={{
                       position: "absolute",
-                      left: "-25px",
-                      top: "-20px",
-                      width: "4px",
-                      height: "40px",
-                      backgroundColor: isPast ? "#ef5350" : "#e0e0e0",
-                      borderRadius: "2px",
-                      transition: "background-color 0.3s ease",
+                      left: 12 + (6 - 2) / 2, // center under the line
+                      top: connectorTop,
+                      width: 2,
+                      height: 40,
+                      background: isPast ? "#43a047" : "#e6eef0",
+                      borderRadius: 2,
+                      transition: "background 300ms",
                     }}
                   />
                 )}
 
+                {/* circle on the line */}
                 <div
                   style={{
-                    width: isCurrent ? "20px" : "14px",
-                    height: isCurrent ? "20px" : "14px",
-                    backgroundColor: isCurrent ? "#43a047" : isPast ? "#ef5350" : "#42a5f5",
-                    borderRadius: "50%",
                     position: "absolute",
-                    left: "-32px",
-                    top: "0",
-                    border: "3px solid #fff",
-                    boxShadow: "0 0 4px rgba(0,0,0,0.15)",
-                    transition: "all 0.3s ease",
-                  }}
-                />
-
-                <div
-                  style={{
-                    fontWeight: isCurrent ? "600" : "400",
-                    color: isCurrent ? "#2e7d32" : isPast ? "#b71c1c" : "#333",
-                    fontSize: "1rem",
+                    left: 6,
+                    top: 12,
+                    transform: "translateY(-2px)",
+                    width: circleSize,
+                    height: circleSize,
+                    borderRadius: "50%",
+                    background: circleColor,
+                    border: circleBorder,
+                    boxShadow: isCurrent ? "0 6px 14px rgba(46,125,50,0.12)" : "0 2px 6px rgba(0,0,0,0.06)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
                   }}
                 >
-                  <strong>{stop.time}</strong> — {stop.name}
-                  {isCurrent && <span style={{ marginLeft: "6px", fontSize: "0.9rem" }}>🚌 Current Stop</span>}
+                  {isPast ? (
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M20 6L9 17l-5-5" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  ) : isCurrent ? (
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="12" cy="12" r="4" fill="#2e7d32" />
+                    </svg>
+                  ) : null}
+                </div>
+
+                {/* stop label */}
+                <div
+                  style={{
+                    marginLeft: 40,
+                    padding: 12,
+                    borderRadius: 10,
+                    background: cardBg,
+                    border: isCurrent ? "1px solid rgba(46,125,50,0.12)" : "1px solid transparent",
+                    transition: "background 220ms, box-shadow 220ms",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <div>
+                    <div style={{ fontSize: 15, fontWeight: isCurrent ? 700 : 600, color: labelColor }}>
+                      {stop.name}
+                      {isCurrent && <span style={{ marginLeft: 8, fontSize: 13, color: "#1b5e20" }}>🚌 Current</span>}
+                    </div>
+                    <div style={{ marginTop: 6, fontSize: 13, color: timeColor }}>{stop.time}</div>
+                  </div>
+
+                  {/* right-side status badge */}
+                  <div style={{ textAlign: "right" }}>
+                    {isPast ? (
+                      <div style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "6px 8px", borderRadius: 8, background: "#e8f5e9", color: "#1b5e20", fontWeight: 600, fontSize: 13 }}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="#1b5e20" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                        Completed
+                      </div>
+                    ) : isCurrent ? (
+                      <div style={{ padding: "6px 10px", borderRadius: 8, background: "#fff8e6", color: "#a55b00", fontWeight: 700, fontSize: 13, border: "1px solid rgba(255,193,7,0.12)" }}>
+                        Arriving
+                      </div>
+                    ) : (
+                      <div style={{ padding: "6px 10px", borderRadius: 8, background: "#eef6ff", color: "#0b63d6", fontWeight: 600, fontSize: 13 }}>
+                        Upcoming
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             );
           })}
         </div>
       </div>
+
     </div>
   );
 }
