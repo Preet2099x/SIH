@@ -251,13 +251,13 @@ export const buses = [
       { name: "Jadcherla", time: "23:00", distance: 60, lat: 16.760, lng: 78.158 },
       { name: "Kurnool", time: "01:00", distance: 180, lat: 15.829, lng: 78.037 },
       { name: "Anantapur", time: "02:30", distance: 280, lat: 14.678, lng: 77.600 },
-      { name: "Bangalore Majestic", time: "05:30", distance: 450, lat: 12.978, lng: 77.572 },
+            { name: "Bangalore Majestic", time: "05:30", distance: 450, lat: 12.978, lng: 77.572 },
     ],
     currentIndex: 0,
   },
   // Additional Inter-city buses
   {
-    id: "BUS-204",
+    id: "BUS-110",
     name: "Delhi to Mumbai Express",
     from: "delhi",
     to: "mumbai",
@@ -274,7 +274,7 @@ export const buses = [
     currentIndex: 0,
   },
   {
-    id: "BUS-205",
+    id: "BUS-111",
     name: "Bangalore to Chennai Express",
     from: "bangalore",
     to: "chennai",
@@ -287,6 +287,12 @@ export const buses = [
       { name: "Erode", time: "03:30", distance: 230, lat: 11.341, lng: 77.717 },
       { name: "Coimbatore", time: "05:00", distance: 290, lat: 11.016, lng: 76.956 },
       { name: "Chennai Central", time: "08:00", distance: 350, lat: 13.083, lng: 80.275 },
+    ],
+    currentIndex: 0,
+  },
+];
+
+```
     ],
     currentIndex: 0,
   },
