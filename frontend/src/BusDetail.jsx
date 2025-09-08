@@ -20,20 +20,82 @@ function BusDetail() {
   const [followBus, setFollowBus] = useState(true); // toggle state
   const mapRef = useRef();
 
+  // markerPosition is what we feed to the Marker component — it's animated locally
+  const [markerPosition, setMarkerPosition] = useState(null);
+  const animRef = useRef(null);
+
   useEffect(() => {
     const fetchBus = () => {
       fetch(`http://localhost:4000/buses/${id}`)
         .then(res => res.json())
-        .then(data => setBus(data));
+        .then(data => {
+          setBus(data);
+        })
+        .catch((e) => {
+          console.error("fetchBus error", e);
+        });
     };
     fetchBus();
     const interval = setInterval(fetchBus, 2000);
     return () => clearInterval(interval);
   }, [id]);
 
+  // When bus updates, animate markerPosition from previous to new coords
+  useEffect(() => {
+    if (!bus) return;
+
+    const targetLat = typeof bus.lat === "number" ? bus.lat : bus.stops[bus.currentIndex].lat;
+    const targetLng = typeof bus.lng === "number" ? bus.lng : bus.stops[bus.currentIndex].lng;
+
+    // initialize markerPosition if unset
+    if (!markerPosition) {
+      setMarkerPosition([targetLat, targetLng]);
+      return;
+    }
+
+    // cancel previous animation
+    if (animRef.current) {
+      cancelAnimationFrame(animRef.current.frame);
+      animRef.current = null;
+    }
+
+    const [startLat, startLng] = markerPosition;
+    const duration = 800; // ms for the animation; tweak for faster/slower
+    const startTime = performance.now();
+
+    function step(now) {
+      const t = Math.min(1, (now - startTime) / duration);
+      // linear easing; replace with easeInOut if you want nicer motion
+      const ease = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t; // quick easeInOut
+      const lat = startLat + (targetLat - startLat) * ease;
+      const lng = startLng + (targetLng - startLng) * ease;
+      setMarkerPosition([lat, lng]);
+
+      if (t < 1) {
+        animRef.current = { frame: requestAnimationFrame(step) };
+      } else {
+        animRef.current = null;
+      }
+    }
+
+    animRef.current = { frame: requestAnimationFrame(step) };
+
+    // cleanup on unmount or bus change
+    return () => {
+      if (animRef.current) {
+        cancelAnimationFrame(animRef.current.frame);
+        animRef.current = null;
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bus]); // only react to bus change
+
   if (!bus) return <p style={{ textAlign: "center", marginTop: "50px" }}>Loading...</p>;
 
-  const currentStop = bus.stops[bus.currentIndex];
+  // derive data (safe fallbacks)
+  const currentStop = bus.stops[bus.currentIndex] || bus.stops[0];
+  const markerLat = markerPosition ? markerPosition[0] : (bus.lat ?? currentStop.lat);
+  const markerLng = markerPosition ? markerPosition[1] : (bus.lng ?? currentStop.lng);
 
   // bus marker icon
   const busIcon = new L.Icon({
@@ -95,7 +157,7 @@ function BusDetail() {
       {/* MAP */}
       <div style={{ height: "400px", borderRadius: "12px", overflow: "hidden", marginBottom: "20px" }}>
         <MapContainer
-          center={[currentStop.lat, currentStop.lng]}
+          center={[markerLat, markerLng]}
           zoom={12}
           style={{ height: "100%", width: "100%" }}
           whenCreated={(mapInstance) => (mapRef.current = mapInstance)}
@@ -109,10 +171,13 @@ function BusDetail() {
               </Popup>
             </Marker>
           ))}
-          <Marker position={[currentStop.lat, currentStop.lng]} icon={busIcon}>
-            <Popup>🚌 {currentStop.name} (Current)</Popup>
+
+          {/* animated marker uses the animated markerPosition */}
+          <Marker position={[markerLat, markerLng]} icon={busIcon}>
+            <Popup>🚌 {currentStop.name} {bus.progress ? `(${Math.round(bus.progress * 100)}% to next)` : "(Current)"}</Popup>
           </Marker>
-          <RecenterMap lat={currentStop.lat} lng={currentStop.lng} followBus={followBus} />
+
+          <RecenterMap lat={markerLat} lng={markerLng} followBus={followBus} />
         </MapContainer>
       </div>
 
@@ -130,14 +195,14 @@ function BusDetail() {
         }}
       >
         <strong>{bus.distanceLeft} kms</strong> to{" "}
-        <span style={{ color: "#1b5e20" }}>{bus.nextStop.name}</span>
+        <span style={{ color: "#1b5e20" }}>{bus.nextStop?.name}</span>
       </div>
 
       {/* Progress Bar */}
       <div style={{ margin: "0 auto 25px", maxWidth: "600px" }}>
         {(() => {
-          const traveled = bus.currentStop.distance;
-          const total = bus.stops[bus.stops.length - 1].distance;
+          const traveled = bus.currentStop?.distance ?? currentStop.distance ?? 0;
+          const total = bus.stops[bus.stops.length - 1].distance ?? 1;
           const progress = Math.min(100, Math.round((traveled / total) * 100));
 
           return (
@@ -169,8 +234,6 @@ function BusDetail() {
           );
         })()}
       </div>
-
-
 
       {/* TIMELINE */}
       <div

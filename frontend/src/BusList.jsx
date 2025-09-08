@@ -1,13 +1,54 @@
+// frontend/src/BusList.jsx
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 function BusList() {
   const [buses, setBuses] = useState([]);
+  const [liveStatus, setLiveStatus] = useState({}); // { busId: { currentIndex, currentStopName } }
 
   useEffect(() => {
     fetch("http://localhost:4000/buses")
-      .then(res => res.json())
-      .then(data => setBuses(data));
+      .then((r) => r.json())
+      .then((data) => setBuses(data))
+      .catch((e) => console.error(e));
+  }, []);
+
+  useEffect(() => {
+    const ws = new WebSocket("ws://localhost:4000/ws");
+
+    ws.onopen = () => {
+      // optional: send a ping
+      ws.send(JSON.stringify({ type: "hello", text: "client connected" }));
+    };
+
+    ws.onmessage = (ev) => {
+      try {
+        const msg = JSON.parse(ev.data);
+        if (msg.type === "snapshot") {
+          // snapshot: array of {id, currentIndex, currentStop}
+          const map = {};
+          msg.payload.forEach((p) => {
+            map[p.id] = { currentIndex: p.currentIndex, currentStop: p.currentStop?.name };
+          });
+          setLiveStatus((s) => ({ ...s, ...map }));
+        } else if (msg.type === "bus_update") {
+          const p = msg.payload;
+          setLiveStatus((s) => ({
+            ...s,
+            [p.id]: { currentIndex: p.currentIndex, currentStop: p.currentStop?.name },
+          }));
+        }
+      } catch (e) {
+        // ignore
+      }
+    };
+
+    ws.onclose = () => console.log("WS closed");
+    ws.onerror = (err) => console.error("WS error", err);
+
+    return () => {
+      ws.close();
+    };
   }, []);
 
   return (
@@ -25,40 +66,37 @@ function BusList() {
           margin: "0 auto",
         }}
       >
-        {buses.map(bus => (
-          <Link
-            key={bus.id}
-            to={`/bus/${bus.id}`}
-            style={{
-              textDecoration: "none",
-              color: "inherit",
-            }}
-          >
-            <div
+        {buses.map((bus) => {
+          const status = liveStatus[bus.id];
+          return (
+            <Link
+              key={bus.id}
+              to={`/bus/${bus.id}`}
               style={{
-                background: "#fff",
-                padding: "20px",
-                borderRadius: "16px",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-                transition: "transform 0.2s ease, box-shadow 0.2s ease",
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.transform = "translateY(-5px)";
-                e.currentTarget.style.boxShadow = "0 6px 12px rgba(0,0,0,0.12)";
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.08)";
+                textDecoration: "none",
+                color: "inherit",
               }}
             >
-              <h2 style={{ fontSize: "1.2rem", marginBottom: "10px", color: "#007bff" }}>{bus.name}</h2>
-              <p style={{ fontSize: "0.9rem", color: "#555" }}>Bus ID: {bus.id}</p>
-              <p style={{ marginTop: "8px", fontSize: "0.85rem", color: "#666" }}>
-                Click to view route details →
-              </p>
-            </div>
-          </Link>
-        ))}
+              <div
+                style={{
+                  background: "#fff",
+                  padding: "20px",
+                  borderRadius: "16px",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                }}
+              >
+                <h2 style={{ fontSize: "1.15rem", marginBottom: "8px", color: "#007bff" }}>{bus.name}</h2>
+                <p style={{ fontSize: "0.9rem", color: "#555" }}>Bus ID: {bus.id}</p>
+                <div style={{ marginTop: 12, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <small style={{ color: "#666" }}>Click to view route →</small>
+                  <div style={{ fontSize: 12, color: "#444" }}>
+                    {status ? <span>At: <strong>{status.currentStop}</strong></span> : <span>—</span>}
+                  </div>
+                </div>
+              </div>
+            </Link>
+          );
+        })}
       </div>
     </div>
   );
