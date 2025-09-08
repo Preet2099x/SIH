@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 
 function BusList() {
-  const [buses, setBuses] = useState([]);
   const [liveStatus, setLiveStatus] = useState({}); // { busId: { currentIndex, currentStopName } }
   const [filteredBuses, setFilteredBuses] = useState([]);
   const [searchParams] = useSearchParams();
@@ -18,7 +17,6 @@ function BusList() {
     fetch("http://localhost:4000/buses")
       .then((r) => r.json())
       .then((data) => {
-        setBuses(data);
         // Filter buses based on search parameters
         if (fromCity && toCity) {
           const filtered = data.filter(bus => {
