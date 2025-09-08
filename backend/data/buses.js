@@ -2,6 +2,9 @@ export const buses = [
   {
     id: "BUS-101",
     name: "Delhi Express",
+    from: "delhi",
+    to: "gurgaon",
+    route: "Delhi - Gurgaon",
     stops: [
       { name: "Kashmere Gate", time: "08:00", distance: 0, lat: 28.667, lng: 77.231 },
       { name: "ISBT", time: "08:15", distance: 10, lat: 28.673, lng: 77.225 },
@@ -19,6 +22,9 @@ export const buses = [
   {
     id: "BUS-102",
     name: "Mumbai Local Bus",
+    from: "mumbai",
+    to: "mumbai",
+    route: "Mumbai Local Circuit",
     stops: [
       { name: "Borivali", time: "07:00", distance: 0, lat: 19.229, lng: 72.857 },
       { name: "Andheri", time: "07:20", distance: 15, lat: 19.118, lng: 72.846 },
@@ -36,6 +42,9 @@ export const buses = [
   {
     id: "BUS-103",
     name: "Bengaluru Tech Shuttle",
+    from: "bangalore",
+    to: "bangalore",
+    route: "Bangalore Tech Circuit",
     stops: [
       { name: "Majestic", time: "06:30", distance: 0, lat: 12.978, lng: 77.572 },
       { name: "Shivajinagar", time: "06:50", distance: 12, lat: 12.991, lng: 77.605 },
@@ -53,6 +62,9 @@ export const buses = [
   {
     id: "BUS-104",
     name: "Chennai Metro Bus",
+    from: "chennai",
+    to: "chennai", 
+    route: "Chennai Metro Circuit",
     stops: [
       { name: "Koyambedu", time: "07:00", distance: 0, lat: 13.070, lng: 80.194 },
       { name: "Anna Nagar", time: "07:15", distance: 10, lat: 13.087, lng: 80.217 },
@@ -70,6 +82,9 @@ export const buses = [
   {
     id: "BUS-105",
     name: "Hyderabad Ring Road Bus",
+    from: "hyderabad",
+    to: "hyderabad",
+    route: "Hyderabad Ring Road",
     stops: [
       { name: "Secunderabad", time: "06:00", distance: 0, lat: 17.439, lng: 78.498 },
       { name: "Begumpet", time: "06:20", distance: 12, lat: 17.448, lng: 78.464 },
@@ -87,6 +102,9 @@ export const buses = [
   {
     id: "BUS-106",
     name: "Kolkata Heritage Route",
+    from: "kolkata",
+    to: "kolkata",
+    route: "Kolkata Heritage Circuit",
     stops: [
       { name: "Howrah", time: "07:00", distance: 0, lat: 22.585, lng: 88.342 },
       { name: "Esplanade", time: "07:20", distance: 15, lat: 22.565, lng: 88.350 },
@@ -104,6 +122,9 @@ export const buses = [
   {
     id: "BUS-107",
     name: "Ahmedabad Sabarmati Shuttle",
+    from: "ahmedabad",
+    to: "ahmedabad",
+    route: "Ahmedabad Sabarmati Circuit",
     stops: [
       { name: "Kalupur", time: "06:30", distance: 0, lat: 23.027, lng: 72.603 },
       { name: "Maninagar", time: "06:50", distance: 12, lat: 23.004, lng: 72.604 },
@@ -121,6 +142,9 @@ export const buses = [
   {
     id: "BUS-108",
     name: "Jaipur Pink Line",
+    from: "jaipur",
+    to: "jaipur", 
+    route: "Jaipur Heritage Circuit",
     stops: [
       { name: "Sindhi Camp", time: "07:00", distance: 0, lat: 26.919, lng: 75.787 },
       { name: "MI Road", time: "07:15", distance: 12, lat: 26.914, lng: 75.813 },
@@ -138,6 +162,9 @@ export const buses = [
   {
     id: "BUS-109",
     name: "Pune IT Corridor Bus",
+    from: "pune",
+    to: "pune",
+    route: "Pune IT Corridor",
     stops: [
       { name: "Swargate", time: "06:00", distance: 0, lat: 18.501, lng: 73.862 },
       { name: "Shivajinagar", time: "06:20", distance: 12, lat: 18.530, lng: 73.847 },
@@ -155,6 +182,9 @@ export const buses = [
   {
     id: "BUS-110",
     name: "Lucknow Gomti Shuttle",
+    from: "lucknow",
+    to: "lucknow",
+    route: "Lucknow Gomti Circuit",
     stops: [
       { name: "Charbagh", time: "07:00", distance: 0, lat: 26.839, lng: 80.922 },
       { name: "Aminabad", time: "07:15", distance: 12, lat: 26.851, lng: 80.929 },
@@ -166,6 +196,62 @@ export const buses = [
       { name: "Faizabad Road", time: "08:45", distance: 100, lat: 26.880, lng: 81.059 },
       { name: "Barabanki", time: "09:00", distance: 120, lat: 26.936, lng: 81.183 },
       { name: "Ayodhya", time: "09:15", distance: 150, lat: 26.800, lng: 82.200 },
+    ],
+    currentIndex: 0,
+  },
+  
+  // Inter-city routes
+  {
+    id: "BUS-201",
+    name: "Delhi-Mumbai Express",
+    from: "delhi",
+    to: "mumbai",
+    route: "Delhi - Mumbai Express",
+    stops: [
+      { name: "Delhi ISBT", time: "20:00", distance: 0, lat: 28.667, lng: 77.231 },
+      { name: "Gurgaon", time: "20:30", distance: 30, lat: 28.459, lng: 77.026 },
+      { name: "Jaipur", time: "23:30", distance: 280, lat: 26.912, lng: 75.787 },
+      { name: "Ajmer", time: "02:00", distance: 400, lat: 26.449, lng: 74.639 },
+      { name: "Udaipur", time: "05:30", distance: 650, lat: 24.585, lng: 73.712 },
+      { name: "Ahmedabad", time: "09:00", distance: 900, lat: 23.022, lng: 72.571 },
+      { name: "Vadodara", time: "11:30", distance: 1050, lat: 22.307, lng: 73.181 },
+      { name: "Surat", time: "13:00", distance: 1200, lat: 21.170, lng: 72.831 },
+      { name: "Mumbai Central", time: "16:00", distance: 1400, lat: 18.969, lng: 72.819 },
+    ],
+    currentIndex: 0,
+  },
+  {
+    id: "BUS-202", 
+    name: "Bangalore-Chennai Express",
+    from: "bangalore",
+    to: "chennai",
+    route: "Bangalore - Chennai Express",
+    stops: [
+      { name: "Bangalore Majestic", time: "22:00", distance: 0, lat: 12.978, lng: 77.572 },
+      { name: "Electronic City", time: "22:30", distance: 25, lat: 12.845, lng: 77.660 },
+      { name: "Hosur", time: "23:00", distance: 40, lat: 12.740, lng: 77.825 },
+      { name: "Krishnagiri", time: "23:45", distance: 90, lat: 12.509, lng: 78.213 },
+      { name: "Salem", time: "01:30", distance: 180, lat: 11.664, lng: 78.146 },
+      { name: "Erode", time: "02:30", distance: 240, lat: 11.341, lng: 77.728 },
+      { name: "Tiruppur", time: "03:00", distance: 280, lat: 11.108, lng: 77.344 },
+      { name: "Coimbatore", time: "03:45", distance: 320, lat: 11.016, lng: 76.956 },
+      { name: "Chennai Koyambedu", time: "07:00", distance: 500, lat: 13.070, lng: 80.194 },
+    ],
+    currentIndex: 0,
+  },
+  {
+    id: "BUS-203",
+    name: "Hyderabad-Bangalore Express", 
+    from: "hyderabad",
+    to: "bangalore",
+    route: "Hyderabad - Bangalore Express",
+    stops: [
+      { name: "Hyderabad Mahatma Gandhi Bus Station", time: "21:30", distance: 0, lat: 17.439, lng: 78.498 },
+      { name: "Shamshabad", time: "22:15", distance: 30, lat: 17.249, lng: 78.396 },
+      { name: "Jadcherla", time: "23:00", distance: 60, lat: 16.760, lng: 78.158 },
+      { name: "Kurnool", time: "01:00", distance: 180, lat: 15.829, lng: 78.037 },
+      { name: "Anantapur", time: "02:30", distance: 280, lat: 14.678, lng: 77.600 },
+      { name: "Bangalore Majestic", time: "05:30", distance: 450, lat: 12.978, lng: 77.572 },
     ],
     currentIndex: 0,
   },
